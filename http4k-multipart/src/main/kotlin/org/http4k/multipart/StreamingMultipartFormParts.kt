@@ -7,6 +7,7 @@ import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState
 import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.FindBoundary
 import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.FindPrefix
 import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.Header
+import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.Header
 import java.io.IOException
 import java.io.InputStream
 import java.lang.String.CASE_INSENSITIVE_ORDER
@@ -77,11 +78,11 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
             val contentDisposition = ParameterParser().parse(headers["Content-Disposition"], ';')
             val contentTypeParams = ParameterParser().parse(contentType, ';')
 
-            mixedName = trim(contentDisposition["name"])
+            mixedName = contentDisposition["name"].trim()
 
             oldBoundary = boundary
             oldBoundaryWithPrefix = boundaryWithPrefix
-            boundary = (String(STREAM_TERMINATOR, encoding) + trim(contentTypeParams["boundary"])!!).toByteArray(encoding)
+            boundary = (String(STREAM_TERMINATOR, encoding) + contentTypeParams["boundary"].trim()!!).toByteArray(encoding)
             boundaryWithPrefix = addPrefixToBoundary(boundary)
 
             state = FindBoundary
@@ -89,7 +90,7 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
             parseNextPart()
         } else {
             val contentDisposition = ParameterParser().parse(headers["Content-Disposition"], ';')
-            val fieldName = (if (contentDisposition.containsKey("attachment")) mixedName else trim(contentDisposition["name"]))
+            val fieldName = (if (contentDisposition.containsKey("attachment")) mixedName else contentDisposition["name"].trim())
                 ?: throw ParseError("no name for part")
 
             StreamingPart(
@@ -102,10 +103,10 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
         }
     }
 
-    private fun filenameFromMap(contentDisposition: Map<String, String>): String? = if (contentDisposition.containsKey("filename")) trim(contentDisposition["filename"]
-        ?: "") else null
+    private fun filenameFromMap(contentDisposition: Map<String, String>): String? = if (contentDisposition.containsKey("filename")) (contentDisposition["filename"]
+        ?: "").trim() else null
 
-    private fun trim(string: String?): String? = string?.trim { it <= ' ' }
+    private fun String?.trim(): String? = this?.trim { it <= ' ' }
 
     private fun parseHeaderLines(): Map<String, String> {
         if (Header != state) throw IllegalStateException("Expected state $Header but got $state")

@@ -28,6 +28,6 @@ data class ContentType(val value: String, val directives: Parameters = emptyList
         val TEXT_XML = Text("text/xml")
         val TEXT_PLAIN = Text("text/plain")
         val OCTET_STREAM = ContentType("application/octet-stream")
-
+        val APPLICATION_HTTP = ContentType("application/http", null)
     }
 }

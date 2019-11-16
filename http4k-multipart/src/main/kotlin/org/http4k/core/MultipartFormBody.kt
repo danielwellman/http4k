@@ -2,6 +2,8 @@ package org.http4k.core
 
 import org.http4k.core.ContentType.Companion.TEXT_HTML
 import org.http4k.core.MultipartFormBody.Companion.DEFAULT_DISK_THRESHOLD
+import org.http4k.core.MultipartDefaults.DEFAULT_DISK_THRESHOLD
+import org.http4k.core.MultipartDefaults.MULTIPART_BOUNDARY
 import org.http4k.lens.Header.CONTENT_TYPE
 import org.http4k.lens.MultipartFormField
 import org.http4k.lens.MultipartFormFile
@@ -14,7 +16,6 @@ import java.io.Closeable
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
-import java.util.UUID
 
 sealed class MultipartEntity : Closeable {
     abstract val name: String
@@ -48,11 +49,11 @@ fun HttpMessage.multipartIterator(): Iterator<MultipartEntity> {
  * Represents a Multi-part that is backed by a stream, which should be closed after handling the content. The gotchas
  * which apply to StreamBody also apply here..
  **/
-data class MultipartFormBody private constructor(internal val formParts: List<MultipartEntity>, val boundary: String = UUID.randomUUID().toString()) : Body, Closeable {
+data class MultipartFormBody private constructor(internal val formParts: List<MultipartEntity>, val boundary: String = MULTIPART_BOUNDARY) : Body {
 
     override val length: Long? = null
 
-    constructor(boundary: String = UUID.randomUUID().toString()) : this(emptyList(), boundary)
+    constructor(boundary: String = MULTIPART_BOUNDARY) : this(emptyList(), boundary)
 
     override fun close() = formParts.forEach(MultipartEntity::close)
 
@@ -79,8 +80,6 @@ data class MultipartFormBody private constructor(internal val formParts: List<Mu
     override fun toString() = String(payload.array())
 
     companion object {
-        const val DEFAULT_DISK_THRESHOLD = 1000 * 1024
-
         fun from(httpMessage: HttpMessage, diskThreshold: Int = DEFAULT_DISK_THRESHOLD): MultipartFormBody {
             val boundary = CONTENT_TYPE(httpMessage)?.directives?.firstOrNull()?.second ?: ""
             val inputStream = httpMessage.body.run { if (stream.available() > 0) stream else ByteArrayInputStream(payload.array()) }

@@ -1,7 +1,7 @@
 package org.http4k.multipart
 
+import org.http4k.core.MultipartDefaults.MULTIPART_BOUNDARY
 import org.http4k.core.Parameters
-import org.http4k.lens.MULTIPART_BOUNDARY
 import java.io.InputStream
 import java.io.SequenceInputStream
 import java.nio.charset.Charset

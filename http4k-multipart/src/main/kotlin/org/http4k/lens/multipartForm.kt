@@ -5,14 +5,14 @@ import org.http4k.core.ContentType
 import org.http4k.core.ContentType.Companion.MULTIPART_FORM_DATA
 import org.http4k.core.ContentType.Companion.MultipartFormWithBoundary
 import org.http4k.core.HttpMessage
+import org.http4k.core.MultipartDefaults.DEFAULT_DISK_THRESHOLD
+import org.http4k.core.MultipartDefaults.MULTIPART_BOUNDARY
 import org.http4k.core.MultipartEntity
 import org.http4k.core.MultipartFormBody
-import org.http4k.core.MultipartFormBody.Companion.DEFAULT_DISK_THRESHOLD
 import org.http4k.core.with
 import org.http4k.lens.ContentNegotiation.Companion.Strict
 import org.http4k.lens.Header.CONTENT_TYPE
 import java.io.Closeable
-import java.util.UUID
 
 data class MultipartForm(val fields: Map<String, List<MultipartFormField>> = emptyMap(),
                          val files: Map<String, List<MultipartFormFile>> = emptyMap(),
@@ -34,8 +34,6 @@ data class MultipartForm(val fields: Map<String, List<MultipartFormField>> = emp
     fun minusField(name: String) = copy(fields = fields - name)
     fun minusFile(name: String) = copy(files = files - name)
 }
-
-val MULTIPART_BOUNDARY = UUID.randomUUID().toString()
 
 fun Body.Companion.multipartForm(
     validator: Validator,
