@@ -379,9 +379,9 @@ internal fun assertThereAreMoreParts(form: Iterator<StreamingPart>) {
 }
 
 internal fun assertPartIsFormField(field: StreamingPart) {
-    assertThat("the StreamingPart is a form field", field.isFormField, equalTo(true))
+    assertThat("the StreamingPart is a form field", field.type, equalTo(PartType.Field))
 }
 
 internal fun assertPartIsNotField(file: StreamingPart) {
-    assertThat("the StreamingPart is not a form field", file.isFormField, equalTo(false))
+    assertThat("the StreamingPart is not a form field", file.type, equalTo(PartType.File))
 }

@@ -78,12 +78,12 @@ class StreamingMultipartFormSadTests {
             .stream())
 
         form.next()
-        val StreamingPart = form.next()
-        assertThat(StreamingPart.fieldName, absent())
-        assertThat(StreamingPart.contentsAsString, equalTo("value with no headers"))
-        assertThat(StreamingPart.headers.size, equalTo(0))
-        assertThat(StreamingPart.isFormField, equalTo(true))
-        assertThat(StreamingPart.fileName, absent())
+        val part = form.next()
+        assertThat(part.fieldName, absent())
+        assertThat(part.contentsAsString, equalTo("value with no headers"))
+        assertThat(part.headers.size, equalTo(0))
+        assertThat(part.type, equalTo(PartType.Field))
+        assertThat(part.fileName, absent())
         form.next()
     }
 
@@ -96,9 +96,9 @@ class StreamingMultipartFormSadTests {
                     "Content-Disposition" to "form-data; bot=\"second\"; name=\"second-name\""))
             .stream())
 
-        val StreamingPart = form.next()
-        assertThat(StreamingPart.fieldName, equalTo("second-name"))
-        assertThat(StreamingPart.headers["Content-Disposition"],
+        val part = form.next()
+        assertThat(part.fieldName, equalTo("second-name"))
+        assertThat(part.headers["Content-Disposition"],
             equalTo("form-data; bot=\"second\"; name=\"second-name\""))
     }
 
