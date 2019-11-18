@@ -181,7 +181,7 @@ class StreamingMultipartFormHappyTests {
 
         val file = assertFilePart(form, "fileFieldName", "filename.txt", "plain/text", "This is the content of the file\n")
 
-        val fileHeaders = file.headers
+        val fileHeaders = file.headers.toMap()
         assertThat(fileHeaders.size, equalTo(3))
         assertThat(fileHeaders["Content-Disposition"], equalTo("form-data; name=\"fileFieldName\"; filename=\"filename.txt\""))
         assertThat(fileHeaders["Content-Type"], equalTo("plain/text"))
@@ -189,7 +189,7 @@ class StreamingMultipartFormHappyTests {
 
         val field = assertFieldPart(form, "fieldFieldName", "This is the content of the field\n")
 
-        val fieldHeaders = field.headers
+        val fieldHeaders = field.headers.toMap()
         assertThat(fieldHeaders.size, equalTo(2))
         assertThat(fieldHeaders["Content-Disposition"], equalTo("form-data; name=\"fieldFieldName\""))
         assertThat(fieldHeaders["Another-header"], equalTo("some-key=\"some-value\""))

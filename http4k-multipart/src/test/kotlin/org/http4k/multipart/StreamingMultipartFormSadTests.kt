@@ -98,7 +98,7 @@ class StreamingMultipartFormSadTests {
 
         val part = form.next()
         assertThat(part.fieldName, equalTo("second-name"))
-        assertThat(part.headers["Content-Disposition"],
+        assertThat(part.headers.toMap()["Content-Disposition"],
             equalTo("form-data; bot=\"second\"; name=\"second-name\""))
     }
 

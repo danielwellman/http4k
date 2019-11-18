@@ -99,7 +99,7 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
                 contentType,
                 filenameFromMap(contentDisposition),
                 BoundedInputStream(),
-                headers)
+                headers.toList())
         }
     }
 
@@ -108,10 +108,10 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
 
     private fun String?.trim(): String? = this?.trim { it <= ' ' }
 
-    private fun parseHeaderLines(): Map<String, String> {
+    private fun parseHeaderLines(): Map<String, String?> {
         if (Header != state) throw IllegalStateException("Expected state $Header but got $state")
 
-        val result = TreeMap<String, String>(CASE_INSENSITIVE_ORDER)
+        val result = TreeMap<String, String?>(CASE_INSENSITIVE_ORDER)
         var previousHeaderName: String? = null
         val maxByteIndexForHeader = inputStream.currentByteIndex() + HEADER_SIZE_MAX
         while (inputStream.currentByteIndex() < maxByteIndexForHeader) {

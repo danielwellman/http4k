@@ -1,5 +1,6 @@
 package org.http4k.multipart
 
+import org.http4k.core.Headers
 import java.io.ByteArrayInputStream
 import java.io.Closeable
 import java.io.File
@@ -11,7 +12,7 @@ import java.nio.file.FileSystemException
 enum class PartType {
     File, Field
 }
-internal sealed class Part(fieldName: String?, type: PartType, contentType: String?, fileName: String?, headers: Map<String, String>, val length: Int) : PartMetaData(fieldName, type, contentType, fileName, headers), Closeable {
+internal sealed class Part(fieldName: String?, type: PartType, contentType: String?, fileName: String?, headers: Headers, val length: Int) : PartMetaData(fieldName, type, contentType, fileName, headers), Closeable {
 
     abstract val newInputStream: InputStream
 
@@ -34,11 +35,9 @@ internal sealed class Part(fieldName: String?, type: PartType, contentType: Stri
                    internal val encoding: Charset)
         : Part(original.fieldName, original.type, original.contentType, original.fileName, original.headers, bytes.size) {
 
-        override val newInputStream: InputStream
-            get() = ByteArrayInputStream(bytes)
+        override val newInputStream get() = ByteArrayInputStream(bytes)
 
         override fun close() {
-            // do nothing
         }
     }
 
