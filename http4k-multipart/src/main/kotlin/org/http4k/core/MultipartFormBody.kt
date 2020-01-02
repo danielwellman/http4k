@@ -1,7 +1,6 @@
 package org.http4k.core
 
 import org.http4k.core.ContentType.Companion.TEXT_HTML
-import org.http4k.core.MultipartFormBody.Companion.DEFAULT_DISK_THRESHOLD
 import org.http4k.core.MultipartDefaults.DEFAULT_DISK_THRESHOLD
 import org.http4k.core.MultipartDefaults.MULTIPART_BOUNDARY
 import org.http4k.core.MultipartEntity.Field

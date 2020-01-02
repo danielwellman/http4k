@@ -1,12 +1,13 @@
 package org.http4k.multipart
 
 import org.apache.commons.fileupload.util.ParameterParser
+import org.http4k.multipart.PartType.Field
+import org.http4k.multipart.PartType.File
 import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.BoundaryFound
 import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.Contents
 import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.Eos
 import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.FindBoundary
 import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.FindPrefix
-import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.Header
 import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.Header
 import java.io.IOException
 import java.io.InputStream
@@ -95,7 +96,7 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
 
             StreamingPart(
                 fieldName,
-                !contentDisposition.containsKey("filename"),
+                if(contentDisposition.containsKey("filename")) File else Field,
                 contentType,
                 filenameFromMap(contentDisposition),
                 BoundedInputStream(),

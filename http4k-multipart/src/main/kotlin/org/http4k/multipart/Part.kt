@@ -12,6 +12,7 @@ import java.nio.file.FileSystemException
 enum class PartType {
     File, Field
 }
+
 internal sealed class Part(fieldName: String?, type: PartType, contentType: String?, fileName: String?, headers: Headers, val length: Int) : PartMetaData(fieldName, type, contentType, fileName, headers), Closeable {
 
     abstract val newInputStream: InputStream
