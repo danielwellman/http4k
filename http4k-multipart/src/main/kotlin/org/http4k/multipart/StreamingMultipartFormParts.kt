@@ -1,14 +1,18 @@
 package org.http4k.multipart
 
 import org.apache.commons.fileupload.util.ParameterParser
+import org.http4k.multipart.MultipartDefaults.DEFAULT_BUFSIZE
+import org.http4k.multipart.MultipartDefaults.FIELD_SEPARATOR
+import org.http4k.multipart.MultipartDefaults.HEADER_SIZE_MAX
+import org.http4k.multipart.MultipartDefaults.STREAM_TERMINATOR
+import org.http4k.multipart.MultipartStreamState.BoundaryFound
+import org.http4k.multipart.MultipartStreamState.Contents
+import org.http4k.multipart.MultipartStreamState.Eos
+import org.http4k.multipart.MultipartStreamState.FindBoundary
+import org.http4k.multipart.MultipartStreamState.FindPrefix
+import org.http4k.multipart.MultipartStreamState.Header
 import org.http4k.multipart.PartType.Field
 import org.http4k.multipart.PartType.File
-import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.BoundaryFound
-import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.Contents
-import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.Eos
-import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.FindBoundary
-import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.FindPrefix
-import org.http4k.multipart.StreamingMultipartFormParts.MultipartFormStreamState.Header
 import java.io.IOException
 import java.io.InputStream
 import java.lang.String.CASE_INSENSITIVE_ORDER
@@ -24,7 +28,7 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
 
     private var boundary = prependBoundaryWithStreamTerminator(inBoundary)
     private var boundaryWithPrefix = addPrefixToBoundary(boundary)
-    private var state: MultipartFormStreamState = FindBoundary
+    private var state = FindBoundary
     // yes yes, I should use a stack or something for this
     private var mixedName: String? = null
     private var oldBoundary = inBoundary
@@ -116,7 +120,7 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
         var previousHeaderName: String? = null
         val maxByteIndexForHeader = inputStream.currentByteIndex() + HEADER_SIZE_MAX
         while (inputStream.currentByteIndex() < maxByteIndexForHeader) {
-            val header = readStringFromStreamUntilMatched(inputStream, FIELD_SEPARATOR, (maxByteIndexForHeader - inputStream.currentByteIndex()).toInt(), encoding)
+            val header = inputStream.readStringUntilMatched(FIELD_SEPARATOR, (maxByteIndexForHeader - inputStream.currentByteIndex()).toInt(), encoding)
             when {
                 header == "" -> {
                     state = Contents
@@ -227,45 +231,7 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
         }
     }
 
-    private enum class MultipartFormStreamState {
-        FindPrefix, FindBoundary, BoundaryFound, Eos, Header, Contents
-    }
-
     companion object {
-        private const val DEFAULT_BUFSIZE = 4096
-
-        /**
-         * The Carriage Return ASCII character value.
-         */
-        private const val CR: Byte = 0x0D
-
-        /**
-         * The Line Feed ASCII character value.
-         */
-        private const val LF: Byte = 0x0A
-
-        /**
-         * The dash (-) ASCII character value.
-         */
-        private const val DASH: Byte = 0x2D
-
-        /**
-         * The maximum length of all headers
-         */
-        const val HEADER_SIZE_MAX = 10 * 1024
-
-        /**
-         * A byte sequence that that follows a delimiter that will be
-         * followed by an encapsulation (`CRLF`).
-         */
-        val FIELD_SEPARATOR = byteArrayOf(CR, LF)
-
-        /**
-         * A byte sequence that that follows a delimiter of the last
-         * encapsulation in the stream (`--`).
-         */
-        val STREAM_TERMINATOR = byteArrayOf(DASH, DASH)
-
         /**
          * Uses the `boundary` to parse the `encoding` coded `inputStream`,
          * returning an `Iterable` of `StreamingPart`s.
@@ -288,19 +254,5 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
 
         fun parse(boundary: ByteArray, inputStream: InputStream, encoding: Charset, maxStreamLength: Int): Iterable<StreamingPart> =
             StreamingMultipartFormParts(boundary, encoding, TokenBoundedInputStream(inputStream, DEFAULT_BUFSIZE, maxStreamLength))
-
-        fun prependBoundaryWithStreamTerminator(boundary: ByteArray): ByteArray {
-            val actualBoundary = ByteArray(boundary.size + 2)
-            System.arraycopy(STREAM_TERMINATOR, 0, actualBoundary, 0, 2)
-            System.arraycopy(boundary, 0, actualBoundary, 2, boundary.size)
-            return actualBoundary
-        }
-
-        fun readStringFromStreamUntilMatched(tokenBoundedInputStream: TokenBoundedInputStream, endOfToken: ByteArray, maxStringSizeInBytes: Int, encoding: Charset): String {
-            // very inefficient search!
-            val buffer = ByteArray(maxStringSizeInBytes)
-            val bytes = tokenBoundedInputStream.getBytesUntil(endOfToken, buffer, encoding)
-            return String(buffer, 0, bytes, encoding)
-        }
     }
 }

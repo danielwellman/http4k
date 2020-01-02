@@ -2,6 +2,8 @@ package org.http4k.multipart
 
 import org.http4k.core.MultipartDefaults.MULTIPART_BOUNDARY
 import org.http4k.core.Parameters
+import org.http4k.multipart.MultipartDefaults.FIELD_SEPARATOR
+import org.http4k.multipart.MultipartDefaults.STREAM_TERMINATOR
 import java.io.InputStream
 import java.io.SequenceInputStream
 import java.nio.charset.Charset
@@ -17,13 +19,13 @@ internal class MultipartFormBuilder(inBoundary: ByteArray, private val encoding:
     constructor(boundary: String = MULTIPART_BOUNDARY) : this(boundary.toByteArray(StandardCharsets.UTF_8), StandardCharsets.UTF_8)
 
     init {
-        boundary.push(StreamingMultipartFormParts.prependBoundaryWithStreamTerminator(inBoundary))
+        boundary.push(prependBoundaryWithStreamTerminator(inBoundary))
     }
 
     fun stream(): InputStream {
         add(boundary.peek())
-        add(StreamingMultipartFormParts.STREAM_TERMINATOR)
-        add(StreamingMultipartFormParts.FIELD_SEPARATOR)
+        add(STREAM_TERMINATOR)
+        add(FIELD_SEPARATOR)
 
         return SequenceInputStream(Collections.enumeration(waitingToStream))
     }
@@ -36,7 +38,7 @@ internal class MultipartFormBuilder(inBoundary: ByteArray, private val encoding:
         val headerLine = "$headerName: ${headerValue.orEmpty()}"
 
         add(headerLine.toByteArray(encoding))
-        add(StreamingMultipartFormParts.FIELD_SEPARATOR)
+        add(FIELD_SEPARATOR)
     }
 
     fun part(contents: String, headers: Parameters) =
@@ -44,13 +46,13 @@ internal class MultipartFormBuilder(inBoundary: ByteArray, private val encoding:
 
     fun part(contents: InputStream, headers: Parameters) = apply {
         add(boundary.peek())
-        add(StreamingMultipartFormParts.FIELD_SEPARATOR)
+        add(FIELD_SEPARATOR)
         if (headers.isNotEmpty()) {
             headers.toList().forEach { (first, second) -> appendHeader(first, second) }
-            add(StreamingMultipartFormParts.FIELD_SEPARATOR)
+            add(FIELD_SEPARATOR)
         }
         waitingToStream.add(contents)
-        add(StreamingMultipartFormParts.FIELD_SEPARATOR)
+        add(FIELD_SEPARATOR)
     }
 
     private fun add(bytes: ByteArray) {
@@ -59,11 +61,11 @@ internal class MultipartFormBuilder(inBoundary: ByteArray, private val encoding:
 
     fun startMultipart(multipartFieldName: String, subpartBoundary: String): MultipartFormBuilder = apply {
         add(boundary.peek())
-        add(StreamingMultipartFormParts.FIELD_SEPARATOR)
+        add(FIELD_SEPARATOR)
         appendHeader("Content-Disposition", """form-data; name="$multipartFieldName"""")
         appendHeader("Content-Type", """multipart/mixed; boundary="$subpartBoundary"""")
-        add(StreamingMultipartFormParts.FIELD_SEPARATOR)
-        boundary.push((String(StreamingMultipartFormParts.STREAM_TERMINATOR, encoding) + subpartBoundary).toByteArray(encoding))
+        add(FIELD_SEPARATOR)
+        boundary.push((String(STREAM_TERMINATOR, encoding) + subpartBoundary).toByteArray(encoding))
     }
 
     fun attachment(fileName: String, contentType: String, contents: String,
@@ -84,7 +86,7 @@ internal class MultipartFormBuilder(inBoundary: ByteArray, private val encoding:
 
     fun endMultipart(): MultipartFormBuilder = apply {
         add(boundary.pop())
-        add(StreamingMultipartFormParts.STREAM_TERMINATOR)
-        add(StreamingMultipartFormParts.FIELD_SEPARATOR)
+        add(STREAM_TERMINATOR)
+        add(FIELD_SEPARATOR)
     }
 }

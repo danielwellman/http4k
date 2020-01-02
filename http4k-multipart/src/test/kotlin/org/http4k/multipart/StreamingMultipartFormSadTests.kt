@@ -5,6 +5,7 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import com.natpryce.hamkrest.has
 import com.natpryce.hamkrest.present
+import org.http4k.multipart.MultipartDefaults.HEADER_SIZE_MAX
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
@@ -199,7 +200,7 @@ class StreamingMultipartFormSadTests {
     fun failsIfHeadingTooLong() {
         val boundary = "---2345"
 
-        val chars = CharArray(StreamingMultipartFormParts.HEADER_SIZE_MAX)
+        val chars = CharArray(HEADER_SIZE_MAX)
         chars.fill('x')
         val form = getMultipartFormParts(boundary, MultipartFormBuilder(boundary)
             .file("aFile", String(chars), "application/octet-stream", "File contents here".byteInputStream(), emptyList()).stream())
