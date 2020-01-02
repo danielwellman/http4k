@@ -76,8 +76,8 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
 
         val contentType = headers["Content-Type"]
         return if (contentType != null && contentType.startsWith("multipart/mixed")) {
-            val contentDisposition = ParameterParser().parse(headers["Content-Disposition"], ';')
-            val contentTypeParams = ParameterParser().parse(contentType, ';')
+            val contentDisposition = ParameterParser().parse(headers["Content-Disposition"])
+            val contentTypeParams = ParameterParser().parse(contentType)
 
             mixedName = contentDisposition["name"].trim()
 
@@ -90,7 +90,7 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
 
             parseNextPart()
         } else {
-            val contentDisposition = ParameterParser().parse(headers["Content-Disposition"], ';')
+            val contentDisposition = ParameterParser().parse(headers["Content-Disposition"])
             val fieldName = (if (contentDisposition.containsKey("attachment")) mixedName else contentDisposition["name"].trim())
                 ?: throw ParseError("no name for part")
 

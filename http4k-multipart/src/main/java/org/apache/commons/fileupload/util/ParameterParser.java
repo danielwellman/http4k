@@ -182,12 +182,11 @@ public class ParameterParser {
      * expected to be unique.
      *
      * @param str       the string that contains a sequence of name/value pairs
-     * @param separator the name/value pairs separator
      * @return a map of name/value pairs
      */
-    public Map<String, String> parse(final String str, char separator) {
+    public Map<String, String> parse(final String str) {
         if (str == null) return new HashMap<>();
-        return parse(str.toCharArray(), separator);
+        return parse(str.toCharArray(), ';');
     }
 
     /**

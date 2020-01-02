@@ -30,29 +30,22 @@ class ParameterParserTest {
     fun testParsing() {
         var s = "test; test1 =  stuff   ; test2 =  \"stuff; stuff\"; test3=\"stuff"
         val parser = ParameterParser()
-        var params = parser.parse(s, ';')
+        var params = parser.parse(s)
         assertEquals(null, params["test"])
         assertEquals("stuff", params["test1"])
         assertEquals("stuff; stuff", params["test2"])
         assertEquals("\"stuff", params["test3"])
 
-        s = "  test  , test1=stuff   ,  , test2=, test3, "
-        params = parser.parse(s, ',')
-        assertEquals(null, params["test"])
-        assertEquals("stuff", params["test1"])
-        assertEquals(null, params["test2"])
-        assertEquals(null, params["test3"])
-
         s = "  test"
-        params = parser.parse(s, ';')
+        params = parser.parse(s)
         assertEquals(null, params["test"])
 
         s = "  "
-        params = parser.parse(s, ';')
+        params = parser.parse(s)
         assertEquals(0, params.size)
 
         s = " = stuff "
-        params = parser.parse(s, ';')
+        params = parser.parse(s)
         assertEquals(0, params.size)
     }
 
@@ -60,12 +53,12 @@ class ParameterParserTest {
     fun testParsingEscapedChars() {
         var s = "param = \"stuff\\\"; more stuff\""
         val parser = ParameterParser()
-        var params = parser.parse(s, ';')
+        var params = parser.parse(s)
         assertEquals(1, params.size)
         assertEquals("stuff\\\"; more stuff", params["param"])
 
         s = "param = \"stuff\\\\\"; anotherparam"
-        params = parser.parse(s, ';')
+        params = parser.parse(s)
         assertEquals(2, params.size)
         assertEquals("stuff\\\\", params["param"])
         assertNull(params["anotherparam"])
