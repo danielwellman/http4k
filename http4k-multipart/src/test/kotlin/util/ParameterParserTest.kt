@@ -36,12 +36,6 @@ class ParameterParserTest {
         assertEquals("stuff; stuff", params["test2"])
         assertEquals("\"stuff", params["test3"])
 
-        params = parser.parse(s, charArrayOf(',', ';'))
-        assertEquals(null, params["test"])
-        assertEquals("stuff", params["test1"])
-        assertEquals("stuff; stuff", params["test2"])
-        assertEquals("\"stuff", params["test3"])
-
         s = "  test  , test1=stuff   ,  , test2=, test3, "
         params = parser.parse(s, ',')
         assertEquals(null, params["test"])
@@ -63,15 +57,6 @@ class ParameterParserTest {
     }
 
     @Test
-    fun testContentTypeParsing() {
-        val s = "text/plain; Charset=UTF-8"
-        val parser = ParameterParser()
-        parser.setLowerCaseNames()
-        val params = parser.parse(s, ';')
-        assertEquals("UTF-8", params["charset"])
-    }
-
-    @Test
     fun testParsingEscapedChars() {
         var s = "param = \"stuff\\\"; more stuff\""
         val parser = ParameterParser()
@@ -85,33 +70,4 @@ class ParameterParserTest {
         assertEquals("stuff\\\\", params["param"])
         assertNull(params["anotherparam"])
     }
-
-    // See: http://issues.apache.org/jira/browse/FILEUPLOAD-139
-    @Test
-    fun testFileUpload139() {
-        val parser = ParameterParser()
-        var s = "Content-type: multipart/form-data , boundary=AaB03x"
-        var params = parser.parse(s, charArrayOf(',', ';'))
-        assertEquals("AaB03x", params["boundary"])
-
-        s = "Content-type: multipart/form-data, boundary=AaB03x"
-        params = parser.parse(s, charArrayOf(';', ','))
-        assertEquals("AaB03x", params["boundary"])
-
-        s = "Content-type: multipart/mixed, boundary=BbC04y"
-        params = parser.parse(s, charArrayOf(',', ';'))
-        assertEquals("BbC04y", params["boundary"])
-    }
-
-    /**
-     * Test for [FILEUPLOAD-199](http://issues.apache.org/jira/browse/FILEUPLOAD-199)
-     */
-    @Test
-    fun fileUpload199() {
-        val parser = ParameterParser()
-        val s = "Content-Disposition: form-data; name=\"file\"; filename=\"=?ISO-8859-1?B?SWYgeW91IGNhbiByZWFkIHRoaXMgeW8=?= =?ISO-8859-2?B?dSB1bmRlcnN0YW5kIHRoZSBleGFtcGxlLg==?=\"\r\n"
-        val params = parser.parse(s, charArrayOf(',', ';'))
-        assertEquals("If you can read this you understand the example.", params["filename"])
-    }
-
 }

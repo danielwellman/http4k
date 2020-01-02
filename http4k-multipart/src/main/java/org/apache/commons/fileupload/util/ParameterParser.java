@@ -21,7 +21,6 @@ import org.apache.commons.fileupload.util.mime.MimeUtility;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -61,11 +60,6 @@ public class ParameterParser {
      * End of a token.
      */
     private int i2 = 0;
-
-    /**
-     * Whether names stored in the map should be converted to lower case.
-     */
-    private boolean lowerCaseNames = false;
 
     /**
      * Are there any characters left to parse?
@@ -184,39 +178,6 @@ public class ParameterParser {
     }
 
     /**
-     * Sets the flag if parameter names are to be converted to lower case when
-     * name/value pairs are parsed.
-     */
-    public void setLowerCaseNames() {
-        this.lowerCaseNames = true;
-    }
-
-    /**
-     * Extracts a map of name/value pairs from the given string. Names are
-     * expected to be unique. Multiple separators may be specified and
-     * the earliest found in the input string is used.
-     *
-     * @param str        the string that contains a sequence of name/value pairs
-     * @param separators the name/value pairs separators
-     * @return a map of name/value pairs
-     */
-    public Map<String, String> parse(final String str, char[] separators) {
-        if (separators == null || separators.length == 0) return new HashMap<>();
-        char separator = separators[0];
-        if (str != null) {
-            int idx = str.length();
-            for (char separator2 : separators) {
-                int tmp = str.indexOf(separator2);
-                if (tmp > -1 && tmp < idx) {
-                    idx = tmp;
-                    separator = separator2;
-                }
-            }
-        }
-        return parse(str, separator);
-    }
-
-    /**
      * Extracts a map of name/value pairs from the given string. Names are
      * expected to be unique.
      *
@@ -284,8 +245,6 @@ public class ParameterParser {
                 pos++; // skip separator
             }
             if ((paramName != null) && (paramName.length() > 0)) {
-                if (this.lowerCaseNames) paramName = paramName.toLowerCase(Locale.ENGLISH);
-
                 params.put(paramName, paramValue);
             }
         }
