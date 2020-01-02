@@ -23,7 +23,7 @@ import java.util.TreeMap
 /**
  * [RFC 1867](http://www.ietf.org/rfc/rfc1867.txt)
  */
-internal class StreamingMultipartFormParts private constructor(inBoundary: ByteArray, private val encoding: Charset, private val inputStream: TokenBoundedInputStream) : Iterable<StreamingPart> {
+internal class StreamingMultipartFormParts internal constructor(inBoundary: ByteArray, private val encoding: Charset, private val inputStream: TokenBoundedInputStream) : Iterable<StreamingPart> {
     private val iterator = StreamingMultipartFormPartIterator()
 
     private var boundary = prependBoundaryWithStreamTerminator(inBoundary)
@@ -251,8 +251,5 @@ internal class StreamingMultipartFormParts private constructor(inBoundary: ByteA
          */
         fun parse(boundary: ByteArray, inputStream: InputStream, encoding: Charset): Iterable<StreamingPart> =
             StreamingMultipartFormParts(boundary, encoding, TokenBoundedInputStream(inputStream, DEFAULT_BUFSIZE))
-
-        fun parse(boundary: ByteArray, inputStream: InputStream, encoding: Charset, maxStreamLength: Int): Iterable<StreamingPart> =
-            StreamingMultipartFormParts(boundary, encoding, TokenBoundedInputStream(inputStream, DEFAULT_BUFSIZE, maxStreamLength))
     }
 }

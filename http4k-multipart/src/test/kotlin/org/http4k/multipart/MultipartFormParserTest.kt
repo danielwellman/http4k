@@ -4,6 +4,7 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.containsSubstring
 import com.natpryce.hamkrest.equalTo
 import org.http4k.core.string
+import org.http4k.multipart.MultipartDefaults.DEFAULT_BUFSIZE
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
@@ -32,8 +33,7 @@ class MultipartFormParserTest {
             FileInputStream("examples/safari-example.multipart").use { body ->
 
                 val boundary = contentType.substring(contentType.indexOf("boundary=") + "boundary=".length).toByteArray(ISO_8859_1)
-                val streamingParts = StreamingMultipartFormParts.parse(
-                    boundary, body, ISO_8859_1, maxStreamLength)
+                val streamingParts = StreamingMultipartFormParts(boundary, ISO_8859_1, TokenBoundedInputStream(body, DEFAULT_BUFSIZE, maxStreamLength))
 
                 val parts = MultipartFormParser(UTF_8, writeToDiskThreshold, temporaryFileDirectory!!).formParts(streamingParts)
                 parts.let {
@@ -93,12 +93,11 @@ class MultipartFormParserTest {
 
     @Test
     fun throwsExceptionIfFormIsTooBig() {
-        val form = StreamingMultipartFormParts.parse(
-            "----WebKitFormBoundary6LmirFeqsyCQRtbj".toByteArray(UTF_8),
-            FileInputStream("examples/safari-example.multipart"),
+        val form = StreamingMultipartFormParts("----WebKitFormBoundary6LmirFeqsyCQRtbj".toByteArray(UTF_8),
             UTF_8,
-            1024
-        )
+            TokenBoundedInputStream(FileInputStream("examples/safari-example.multipart"),
+                DEFAULT_BUFSIZE, 1024
+            ))
 
         try {
             MultipartFormParser(UTF_8, 1024, TEMPORARY_FILE_DIRECTORY).formParts(form)
