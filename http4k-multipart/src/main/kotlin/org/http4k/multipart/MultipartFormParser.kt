@@ -34,17 +34,9 @@ internal class MultipartFormParser(private val encoding: Charset, private val wr
      * be closed so that it is cleaned up after.
      * @throws IOException
      */
-
     fun formParts(parts: Iterable<StreamingPart>): List<Part> {
-        val result = mutableListOf<Part>()
         val bytes = ByteArray(writeToDiskThreshold)
-
-        for (part in parts) {
-            if (part.fieldName == null) throw ParseError("no name for part")
-
-            result.add(serialisePart(part, bytes))
-        }
-        return result
+        return parts.map { serialisePart(it, bytes) }
     }
 
     private fun serialisePart(part: StreamingPart, bytes: ByteArray): Part {
@@ -54,17 +46,13 @@ internal class MultipartFormParser(private val encoding: Charset, private val wr
             val count = part.inputStream.read(bytes, length, writeToDiskThreshold - length)
             if (count < 0) {
                 part.inputStream.use {
-                    return InMemory(
-                        part,
-                        storeInMemory(bytes, length), encoding)
+                    return InMemory(part, storeInMemory(bytes, length), encoding)
                 }
             }
             length += count
             if (length >= writeToDiskThreshold) {
                 part.inputStream.use {
-                    return DiskBacked(
-                        part,
-                        writeToDisk(part, bytes, length))
+                    return DiskBacked(part, writeToDisk(part, bytes, length))
                 }
             }
         }

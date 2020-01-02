@@ -43,8 +43,8 @@ fun HttpMessage.multipartIterator(): Iterator<MultipartEntity> {
         .asSequence()
         .map {
             when (it.type) {
-                PartType.Field -> Field(it.fieldName!!, it.contentsAsString, it.headers.toList())
-                PartType.File -> File(it.fieldName!!, MultipartFormFile(it.fileName!!, ContentType(it.contentType!!,
+                PartType.Field -> Field(it.fieldName, it.contentsAsString, it.headers.toList())
+                PartType.File -> File(it.fieldName, MultipartFormFile(it.fileName!!, ContentType(it.contentType!!,
                     TEXT_HTML.directives), it.inputStream), it.headers.toList())
             }
         }.iterator()
@@ -94,8 +94,8 @@ data class MultipartFormBody private constructor(internal val formParts: List<Mu
             val parts = MultipartFormParser(UTF_8, diskThreshold, dir)
                 .formParts(form)
                 .map {
-                    if (it.type == PartType.Field) Field(it.fieldName!!, it.string(diskThreshold), it.headers.toList())
-                    else File(it.fieldName!!, MultipartFormFile(it.fileName!!, ContentType(it.contentType!!, TEXT_HTML.directives), it.newInputStream))
+                    if (it.type == PartType.Field) Field(it.fieldName, it.string(diskThreshold), it.headers.toList())
+                    else File(it.fieldName, MultipartFormFile(it.fileName!!, ContentType(it.contentType!!, TEXT_HTML.directives), it.newInputStream))
                 }
             return MultipartFormBody(parts, boundary)
         }
