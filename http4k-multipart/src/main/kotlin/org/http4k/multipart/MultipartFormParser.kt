@@ -45,14 +45,14 @@ internal class MultipartFormParser(private val encoding: Charset, private val wr
         while (true) {
             val count = part.inputStream.read(bytes, length, writeToDiskThreshold - length)
             if (count < 0) {
-                part.inputStream.use {
-                    return InMemory(part, storeInMemory(bytes, length), encoding)
+                return part.inputStream.use {
+                    InMemory(part, storeInMemory(bytes, length), encoding)
                 }
             }
             length += count
             if (length >= writeToDiskThreshold) {
-                part.inputStream.use {
-                    return DiskBacked(part, writeToDisk(part, bytes, length))
+                return part.inputStream.use {
+                    DiskBacked(part, writeToDisk(part, bytes, length))
                 }
             }
         }
